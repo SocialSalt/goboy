@@ -1,19 +1,14 @@
-package cart
+package gameboy
 
 import (
+	"encoding/binary"
 	"errors"
 	"os"
 )
 
-type Cart interface{}
-
 type GBCart struct {
 	Data   []byte
 	Header GBRomHeader
-}
-
-type GBACart struct {
-	Data []byte
 }
 
 type GBRomHeader struct {
@@ -56,12 +51,31 @@ func NewGBRomHeader(data []byte) GBRomHeader {
 	return header
 }
 
-func (h *GBRomHeader) ComputeHeaderChecksum() {
+func (c *GBCart) Read(addr uint16) (byte, error) {
+
+	return c.Data[addr], nil
 
 }
 
-func (h *GBRomHeader) ComputeGlobalChecksum() {
+func ComputeHeaderChecksum(cart GBCart) byte {
+	var checksum byte = 0
+	for _, d := range cart.Data[0x134:0x14D] {
+		checksum = checksum + (^d)
+	}
+	return checksum
+}
 
+func ComputeGlobalChecksum(cart GBCart) []byte {
+	var checksum uint16 = 0
+	for i, d := range cart.Data {
+		if i == 0x14E || i == 0x14F {
+			continue
+		}
+		checksum = checksum + uint16(d)
+	}
+	ret := make([]byte, 2)
+	binary.BigEndian.PutUint16(ret, checksum)
+	return ret
 }
 
 func LoadCart(cartPath string) (GBCart, error) {

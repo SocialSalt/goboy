@@ -4,8 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/SocialSalt/goboy/internal/cart"
-	"github.com/SocialSalt/goboy/internal/cpu"
+	"github.com/SocialSalt/goboy/internal/gameboy"
 )
 
 type EmuContext struct {
@@ -20,7 +19,7 @@ func NewEmuContext() EmuContext {
 
 func Run(cartPath string) {
 
-	cart, err := cart.LoadCart(cartPath)
+	cart, err := gameboy.LoadCart(cartPath)
 	if err != nil {
 		log.Fatal("failed to load cart %s", err)
 	}
@@ -29,7 +28,7 @@ func Run(cartPath string) {
 	ctx.Running = true
 	ctx.Ticks = 0
 
-	cpu, err := cpu.NewCPU()
+	cpu, err := gameboy.NewCpu()
 	if err != nil {
 		log.Fatal("Failed to initalize cpu %s", err)
 	}

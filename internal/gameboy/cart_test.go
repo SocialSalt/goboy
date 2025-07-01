@@ -1,10 +1,11 @@
-package cart_test
+package gameboy_test
 
 import (
 	"testing"
 
 	"github.com/SocialSalt/goboy/internal/cart"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 var nintendoLogo []byte = []byte{
@@ -131,5 +132,36 @@ func TestGBCartReadLinksAwakening(t *testing.T) {
 	if diff := cmp.Diff([]byte{0x3A, 0xEE}, loadedCart.Header.GlobalChecksum); diff != "" {
 		t.Errorf("Failed to load the global checksum correctly. (-want +got) %s", diff)
 	}
+}
 
+func TestHeaderChecksum(t *testing.T) {
+	cartPath := "/Users/ethanwalker/Library/Application Support/OpenEmu/Game Library/roms/Game Boy/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).gb"
+
+	loadedCart, err := cart.LoadCart(cartPath)
+	require.NoError(t, err, "cart failed to load")
+	checksum := cart.ComputeHeaderChecksum(loadedCart)
+	require.Equal(t, loadedCart.Header.HeaderChecksum, checksum)
+
+	cartPath = "/Users/ethanwalker/Library/Application Support/OpenEmu/Game Library/roms/Game Boy/Pokemon - Crystal Version (USA, Europe) (Rev 1).gbc"
+
+	loadedCart, err = cart.LoadCart(cartPath)
+	require.NoError(t, err, "cart failed to load")
+	checksum = cart.ComputeHeaderChecksum(loadedCart)
+	require.Equal(t, loadedCart.Header.HeaderChecksum, checksum)
+}
+
+func TestGlobalChecksum(t *testing.T) {
+	cartPath := "/Users/ethanwalker/Library/Application Support/OpenEmu/Game Library/roms/Game Boy/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).gb"
+
+	loadedCart, err := cart.LoadCart(cartPath)
+	require.NoError(t, err, "cart failed to load")
+	checksum := cart.ComputeGlobalChecksum(loadedCart)
+	// require.Equal(t, loadedCart.Header.GlobalChecksum, checksum)
+
+	cartPath = "/Users/ethanwalker/Library/Application Support/OpenEmu/Game Library/roms/Game Boy/Pokemon - Crystal Version (USA, Europe) (Rev 1).gbc"
+
+	loadedCart, err = cart.LoadCart(cartPath)
+	require.NoError(t, err, "cart failed to load")
+	checksum = cart.ComputeGlobalChecksum(loadedCart)
+	require.Equal(t, loadedCart.Header.GlobalChecksum, checksum)
 }
