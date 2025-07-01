@@ -46,14 +46,6 @@ func (m *Memory) Read(addr uint16) (byte, error) {
 	}
 }
 
-func (m *Memory) ReadRAM(addr uint16) byte {
-	return m.RAM[addr]
-}
-
-func (m *Memory) WriteRAM(addr uint16, value byte) error {
+func (m *Memory) Write(addr uint16, value byte) error {
 	return nil
-}
-
-func (m *Memory) ReadVRAM(addr uint16) byte {
-	return m.VRAM[addr]
 }
