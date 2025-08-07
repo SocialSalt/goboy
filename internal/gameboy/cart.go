@@ -3,6 +3,7 @@ package gameboy
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"os"
 )
 
@@ -55,6 +56,10 @@ func (c *GBCart) Read(addr uint16) (byte, error) {
 
 	return c.Data[addr], nil
 
+}
+
+func (c *GBCart) Write(addr uint16, value byte) error {
+	return fmt.Errorf("no writing to rom")
 }
 
 func ComputeHeaderChecksum(cart GBCart) byte {
