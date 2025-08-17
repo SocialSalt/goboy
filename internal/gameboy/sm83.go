@@ -45,11 +45,15 @@ func (cpu *SM83) LogState() string {
 
 func (cpu *SM83) IncrCycles(n int) {}
 
+func first[T, U any](val T, _ U) T {
+	return val
+}
+
 func (cpu *SM83) Step() error {
 	if !cpu.halted {
 		err := cpu.GetInstruction()
 		if err != nil {
-			slog.Error("cpu crashed while getting instruction", "err", err, "cpu state", cpu)
+			slog.Error("cpu crashed while getting instruction", "err", err, "cpu state", cpu.LogState())
 			return fmt.Errorf("cpu crashed while getting instruction: %w\ncpu state: %+v", err, cpu)
 		}
 		err = cpu.GetData()
@@ -57,6 +61,17 @@ func (cpu *SM83) Step() error {
 			slog.Error("cpu crashed while getting data", "err", err, "cpu state", cpu.LogState())
 			return fmt.Errorf("cpu crashed while getting data: %w\ncpu state: %+v", err, cpu)
 		}
+
+		slog.Debug(fmt.Sprintf(
+			"prepare to execute:\n\tPC: 0x%04X\n\tinstr type & name: %v %v\n\topcode: 0x%X\n\tfetched data: 0x%X\n\tdata: 0x%X 0x%X",
+			cpu.Registers.PC,
+			cpu.CurInstruction.InstrType,
+			instructionTypeNames[cpu.CurInstruction.InstrType],
+			cpu.CurOpcode,
+			cpu.FetchedData,
+			first(cpu.Memory.Read(cpu.Registers.PC+1)),
+			first(cpu.Memory.Read(cpu.Registers.PC+2)),
+		))
 		err = cpu.Execute()
 		if err != nil {
 			return err
@@ -67,16 +82,13 @@ func (cpu *SM83) Step() error {
 
 func (cpu *SM83) GetInstruction() error {
 	opcode, err := cpu.Memory.Read(cpu.Registers.PC)
-	slog.Log(context.TODO(), -8, "got opcode", "opcode", fmt.Sprintf("%X", opcode))
+	slog.Log(context.TODO(), -8, "got opcode", "opcode", fmt.Sprintf("0x%X", opcode))
 	if err != nil {
 		return err
 	}
 	cpu.CurOpcode = opcode
-	cpu.CurInstruction = instructions[opcode]
+	cpu.CurInstruction = &instructions[opcode]
 	slog.Log(context.TODO(), -8, "got instr", "instr", cpu.CurInstruction)
-	if cpu.CurInstruction == nil {
-		return fmt.Errorf("unknown instruction with opcode: %X", opcode)
-	}
 	cpu.Registers.PC++
 	return nil
 }
@@ -128,6 +140,29 @@ func (cpu *SM83) GetData() error {
 }
 
 func (cpu *SM83) Execute() error {
-	slog.Debug("Executing instruction", "opcode", fmt.Sprintf("%X", cpu.CurOpcode), "PC", fmt.Sprintf("%X", cpu.Registers.PC), "cpu state", cpu.LogState())
-	return nil
+	proc := instructionProcesses[cpu.CurInstruction.InstrType]
+	if proc == nil {
+		slog.Debug("failed to load instruction process", "CurInstruction", cpu.CurInstruction)
+		return fmt.Errorf("failed to load instruction process %v", cpu.CurInstruction)
+	}
+	return proc(cpu)
+}
+
+func (cpu *SM83) CheckCondition() bool {
+	z := cpu.Registers.ZFlag()
+	c := cpu.Registers.CFlag()
+	switch cpu.CurInstruction.CondType {
+	case C_NONE:
+		return true
+	case C_C:
+		return c
+	case C_NC:
+		return !c
+	case C_Z:
+		return z
+	case C_NZ:
+		return !z
+	default:
+		return false
+	}
 }

@@ -22,6 +22,9 @@ type Memory struct {
 	// interrupt enable register
 	IE byte
 
+	// interrupt master enable
+	IME bool
+
 	// object attribute memory
 	OAM [0x100]byte
 

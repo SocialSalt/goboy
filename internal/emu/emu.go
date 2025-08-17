@@ -39,10 +39,13 @@ func Run(cartPath string) error {
 		}
 		err := cpu.Step()
 		if err != nil {
-			return fmt.Errorf("Error while taking cpu step: %w", err)
+			return err
 		}
 
 		ctx.Ticks++
+		if ctx.Ticks > 1000 {
+			return fmt.Errorf("I wasn't supposed to run this long %v", ctx.Ticks)
+		}
 	}
 	return nil
 }
