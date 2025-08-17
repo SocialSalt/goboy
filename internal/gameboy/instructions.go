@@ -1,5 +1,7 @@
 package gameboy
 
+import "fmt"
+
 type Instruction struct {
 	// Name  string // Mnemonic of the instruction
 	// Len   int    // length in bytes
@@ -12,6 +14,13 @@ type Instruction struct {
 	RegType2  RegisterType
 	CondType  ConditionType
 	param     byte
+}
+
+func (i *Instruction) LogState() string {
+	if i == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("%+v", i)
 }
 
 type InstructionType int
@@ -124,15 +133,9 @@ const (
 	C_C
 )
 
-var instructions = [0x100]Instruction{
+var instructions = [0x100]*Instruction{
 	0x00: {InstrType: I_NOP, AddrMode: A_IMP},
-	0x01: {},
-	0x02: {},
-	0x03: {},
-	0x04: {},
 	0x05: {InstrType: I_DEC, AddrMode: A_R, RegType1: R_B},
-	0x06: {},
-	0x07: {},
 	0x0E: {InstrType: I_LD, AddrMode: A_R_D8, RegType1: R_C},
 	0xAF: {InstrType: I_XOR, AddrMode: A_R, RegType1: R_A},
 	0xC3: {InstrType: I_JP, AddrMode: A_D16},

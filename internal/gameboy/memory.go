@@ -1,12 +1,14 @@
 package gameboy
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 )
 
 type Memory struct {
-	Cart GBCart
+	Cart *GBCart
 	RAM  [0x100]byte
 
 	// there are 2 banks of VRAM each is 0x2000
@@ -23,10 +25,15 @@ type Memory struct {
 	// object attribute memory
 	OAM [0x100]byte
 
-	IO GameboyHardware
+	IO *GameboyHardware
+}
+
+func NewMemory(cart *GBCart) *Memory {
+	return &Memory{Cart: cart}
 }
 
 func (m *Memory) Read(addr uint16) (byte, error) {
+	slog.Log(context.TODO(), -12, "reading memory", "address", addr)
 	switch {
 	case addr < 0x8000:
 		// read from the rom

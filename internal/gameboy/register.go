@@ -1,5 +1,7 @@
 package gameboy
 
+import "fmt"
+
 type Register struct {
 	AF uint16
 	BC uint16
@@ -7,6 +9,17 @@ type Register struct {
 	HL uint16
 	SP uint16
 	PC uint16
+}
+
+func NewRegister() *Register {
+	return &Register{PC: 0x100, AF: 0x100}
+}
+
+func (r *Register) LogState() string {
+	if r == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("%+v", r)
 }
 
 func (r *Register) Read(rt RegisterType) uint16 {

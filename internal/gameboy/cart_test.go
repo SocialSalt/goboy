@@ -3,7 +3,7 @@ package gameboy_test
 import (
 	"testing"
 
-	"github.com/SocialSalt/goboy/internal/cart"
+	"github.com/SocialSalt/goboy/internal/gameboy"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 )
@@ -15,7 +15,7 @@ var nintendoLogo []byte = []byte{
 func TestGBCartReadPokemonCrystal(t *testing.T) {
 	cartPath := "/Users/ethanwalker/Library/Application Support/OpenEmu/Game Library/roms/Game Boy/Pokemon - Crystal Version (USA, Europe) (Rev 1).gbc"
 
-	loadedCart, err := cart.LoadCart(cartPath)
+	loadedCart, err := gameboy.LoadCart(cartPath)
 
 	if err != nil {
 		t.Fatalf("Failed to load cart data %s", err)
@@ -76,7 +76,7 @@ func TestGBCartReadPokemonCrystal(t *testing.T) {
 func TestGBCartReadLinksAwakening(t *testing.T) {
 	cartPath := "/Users/ethanwalker/Library/Application Support/OpenEmu/Game Library/roms/Game Boy/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).gb"
 
-	loadedCart, err := cart.LoadCart(cartPath)
+	loadedCart, err := gameboy.LoadCart(cartPath)
 
 	if err != nil {
 		t.Fatalf("Failed to load cart data %s", err)
@@ -137,31 +137,31 @@ func TestGBCartReadLinksAwakening(t *testing.T) {
 func TestHeaderChecksum(t *testing.T) {
 	cartPath := "/Users/ethanwalker/Library/Application Support/OpenEmu/Game Library/roms/Game Boy/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).gb"
 
-	loadedCart, err := cart.LoadCart(cartPath)
+	loadedCart, err := gameboy.LoadCart(cartPath)
 	require.NoError(t, err, "cart failed to load")
-	checksum := cart.ComputeHeaderChecksum(loadedCart)
+	checksum := gameboy.ComputeHeaderChecksum(loadedCart)
 	require.Equal(t, loadedCart.Header.HeaderChecksum, checksum)
 
 	cartPath = "/Users/ethanwalker/Library/Application Support/OpenEmu/Game Library/roms/Game Boy/Pokemon - Crystal Version (USA, Europe) (Rev 1).gbc"
 
-	loadedCart, err = cart.LoadCart(cartPath)
+	loadedCart, err = gameboy.LoadCart(cartPath)
 	require.NoError(t, err, "cart failed to load")
-	checksum = cart.ComputeHeaderChecksum(loadedCart)
+	checksum = gameboy.ComputeHeaderChecksum(loadedCart)
 	require.Equal(t, loadedCart.Header.HeaderChecksum, checksum)
 }
 
 func TestGlobalChecksum(t *testing.T) {
 	cartPath := "/Users/ethanwalker/Library/Application Support/OpenEmu/Game Library/roms/Game Boy/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).gb"
 
-	loadedCart, err := cart.LoadCart(cartPath)
+	loadedCart, err := gameboy.LoadCart(cartPath)
 	require.NoError(t, err, "cart failed to load")
-	checksum := cart.ComputeGlobalChecksum(loadedCart)
+	checksum := gameboy.ComputeGlobalChecksum(loadedCart)
 	// require.Equal(t, loadedCart.Header.GlobalChecksum, checksum)
 
 	cartPath = "/Users/ethanwalker/Library/Application Support/OpenEmu/Game Library/roms/Game Boy/Pokemon - Crystal Version (USA, Europe) (Rev 1).gbc"
 
-	loadedCart, err = cart.LoadCart(cartPath)
+	loadedCart, err = gameboy.LoadCart(cartPath)
 	require.NoError(t, err, "cart failed to load")
-	checksum = cart.ComputeGlobalChecksum(loadedCart)
+	checksum = gameboy.ComputeGlobalChecksum(loadedCart)
 	require.Equal(t, loadedCart.Header.GlobalChecksum, checksum)
 }
